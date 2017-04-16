@@ -3,7 +3,9 @@ spring:
     config:
       server:
         git:
-          uri: file://${user.home}/dev/opensource/configserver
+          uri: file:/opt/configserver
+          searchPaths:
+            - config-store/**
 management:
     security:
       enabled: false
