@@ -3,6 +3,7 @@ spring:
     config:
       server:
         git:
+          force_pull: true
           uri: file:/opt/configserver
           searchPaths:
             - config-store/**
