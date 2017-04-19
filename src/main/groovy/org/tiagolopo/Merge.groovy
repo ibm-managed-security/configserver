@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.RestController
 
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-
+import groovyx.net.http.RESTClient
+import groovy.json.JsonOutput
 
 @RestController
 class Merge {
@@ -37,8 +38,28 @@ class Merge {
     }
 
     void doSomething ( HttpServletResponse response, String appName, String profile, String label=null ) {
-        def result = new URL("http://localhost:8080/cfg/"+appName+ "/" + profile).text
-        response.getOutputStream().println(result)
-        response.getOutputStream().println('abc')
+        String host = "http://localhost:8080"
+        String path = "/cfg/"+appName+ "/" + profile
+
+        RESTClient rc = new RESTClient(host)
+        def  resp = rc.get(path: path)
+        def data = resp.data
+        def result = null
+
+
+        if ( data && data['propertySources'] && data['propertySources'].size > 1 ) {
+            Map.metaClass.addNested = { Map rhs ->
+                def lhs = delegate
+                rhs.each { k, v -> lhs[k] = lhs[k] in Map ? lhs[k].addNested(v) : v }
+                lhs
+            }
+            result = (data.propertySources[1].addNested(data.propertySources[0])).source
+        }else if (data && data['propertySources']) {
+            result = data.propertySources[0].source
+        }
+
+        println "DATA:\n${resp.data}"
+
+        response.getOutputStream().println(JsonOutput.toJson(result ?: {} ) )
     }
 }

@@ -31,6 +31,7 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-groovy-templates')
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.codehaus.groovy.modules.http-builder:http-builder:0.7.1')
+	compile('org.codehaus.groovy:groovy-all')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
