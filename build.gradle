@@ -27,11 +27,12 @@ repositories {
 
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-actuator')
-	compile('org.springframework.cloud:spring-cloud-config-server')
+	compile('org.springframework.cloud:spring-cloud-config-server:1.2.3.RELEASE')
 	compile('org.springframework.boot:spring-boot-starter-groovy-templates')
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.codehaus.groovy.modules.http-builder:http-builder:0.7.1')
 	compile('org.codehaus.groovy:groovy-all')
+	compile('org.yaml:snakeyaml:1.18')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 

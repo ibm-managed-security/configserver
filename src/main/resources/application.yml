@@ -9,6 +9,8 @@ spring:
             - config-store/**
         prefix: cfg
 
+#server.port: 8080
+
 management:
     security:
       enabled: false
