@@ -22,6 +22,7 @@ class Merge {
 
     @Value('${server.port ?: 8080}')
     Integer serverPort
+    String baseLocalUrl
 
     @ResponseBody
     @RequestMapping(value = "/merge/{appName}/{profile}/{label}", method = RequestMethod.GET)
@@ -54,25 +55,15 @@ class Merge {
             String label=null,
             String format=null ) {
 
-        String host = "http://localhost:${serverPort}"
+        baseLocalUrl = "http://localhost:${serverPort}"
+
         String path = "/cfg/${appName}/${profile}"
         path += label ? "/${label}" : ''
 
         format = format ?: 'json'
-        RESTClient rc = new RESTClient(host)
-        def resp
-        try {
-            resp = rc.get(path: path)
-        }catch(ex){
-            println "Failed to hit ${path}"
-            response.setStatus(ex.response.status)
-            response.getOutputStream().println( JsonOutput.toJson(ex.response.data) )
-            ex.printStackTrace()
-            return
-        }
-
+        def resp = getConfig(path, response)
         def data = resp ? resp.data : null
-        def result = null
+        def result
 
         if ( data && data['propertySources'] && data['propertySources'].size > 1 ) {
             Map.metaClass.addNested = { Map rhs ->
@@ -88,6 +79,23 @@ class Merge {
         result = convertTo(result, format)
 
         response.getOutputStream().println(result)
+    }
+
+    private getConfig (path, HttpServletResponse response){
+        RESTClient rc = new RESTClient(baseLocalUrl)
+        def resp
+        try {
+            resp = rc.get(path: path)
+        }catch(ex){
+            println "Failed to hit ${baseLocalUrl}/${path}"
+            if(ex.response) {
+                response.setStatus(ex.response.status)
+                response.getOutputStream().println( JsonOutput.toJson(ex.response.data) )
+            }
+            ex.printStackTrace()
+            return
+        }
+        resp
     }
 
     private String convertTo (Object obj, String format){
