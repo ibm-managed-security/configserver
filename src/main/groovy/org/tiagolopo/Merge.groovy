@@ -55,13 +55,7 @@ class Merge {
             String label=null,
             String format=null ) {
 
-        baseLocalUrl = "http://localhost:${serverPort}"
-
-        String path = "/cfg/${appName}/${profile}"
-        path += label ? "/${label}" : ''
-
-        format = format ?: 'json'
-        def resp = getConfig(path, response)
+        def resp = getConfig(appName, profile, label , response)
         def data = resp ? resp.data : null
         def result
 
@@ -81,10 +75,15 @@ class Merge {
         response.getOutputStream().println(result)
     }
 
-    private getConfig (path, HttpServletResponse response){
+    private getConfig (appName, profile, label , HttpServletResponse response){
+        baseLocalUrl = "http://localhost:${serverPort}"
+        String path = "/cfg/${appName}/${profile}"
+        path += label ? "/${label}" : ''
+
         RESTClient rc = new RESTClient(baseLocalUrl)
         def resp
         try {
+            println "Hitting: ${path}"
             resp = rc.get(path: path)
         }catch(ex){
             println "Failed to hit ${baseLocalUrl}/${path}"
@@ -100,6 +99,7 @@ class Merge {
 
     private String convertTo (Object obj, String format){
         if (!obj) { return '{}' }
+        format = format ?: 'json'
         def result = new Flatter().flat(obj)
         if ( format.toLowerCase() == 'json' ) {
             result = new Deflatter(result).deflat()
