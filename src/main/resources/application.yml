@@ -7,7 +7,12 @@ spring:
           uri: file:/opt/configserver
           searchPaths:
             - config-store/**
+          clone-on-start: true
         prefix: cfg
+        bootstrap: true
+        health:
+          enabled: false
+
 
 #server.port: 8080
 

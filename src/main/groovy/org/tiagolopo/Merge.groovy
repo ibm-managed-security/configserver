@@ -17,6 +17,10 @@ import org.tiagolopo.utils.Deflatter
 import org.tiagolopo.utils.Flatter
 import org.yaml.snakeyaml.Yaml
 
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+
 @RestController
 class Merge {
 
@@ -55,16 +59,27 @@ class Merge {
             String label=null,
             String format=null ) {
 
-        def resp = getConfig(appName, profile, label , response)
-        def data = resp ? resp.data : null
         def result
 
-        if ( data && data['propertySources'] ) {
-            result = deepMerge( *(data.propertySources) ).source
+        ExecutorService es = Executors.newFixedThreadPool(10)
+        LinkedList profiles = profile.split(',')
+        LinkedList cfgList
+        LinkedList taskList = []
+
+        if ( profiles[0] != 'default' ){
+            profiles.addFirst('default')
         }
 
-        result = convertTo(result, format)
+        profiles.each { p ->
+            taskList.push ( { getConfig(appName, p, label, response) } as Callable)
+            taskList.push ( { getConfig(appName, "${p}-secret", label, response) } as Callable)
+        }
 
+        cfgList = es.invokeAll(taskList)
+        es.shutdown()
+
+        result = deepMerge( *(cfgList.collect{it.get()}) )
+        result = convertTo(result, format)
         response.getOutputStream().println(result)
     }
 
@@ -106,7 +121,12 @@ class Merge {
             ex.printStackTrace()
             return
         }
-        resp
+
+        def data = resp ? resp.data : null
+        if (data && data.propertySources) {
+            return data.propertySources[0].source
+        }
+        return {}
     }
 
     private String convertTo (Object obj, String format){
