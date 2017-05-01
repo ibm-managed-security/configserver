@@ -59,20 +59,32 @@ class Merge {
         def data = resp ? resp.data : null
         def result
 
-        if ( data && data['propertySources'] && data['propertySources'].size > 1 ) {
-            Map.metaClass.addNested = { Map rhs ->
-                def lhs = delegate
-                rhs.each { k, v -> lhs[k] = lhs[k] in Map ? lhs[k].addNested(v) : v }
-                lhs
-            }
-            result = (data.propertySources[1].addNested(data.propertySources[0])).source
-        }else if (data && data['propertySources']) {
-            result = data.propertySources[0].source
+        if ( data && data['propertySources'] ) {
+            result = deepMerge( *(data.propertySources) ).source
         }
 
         result = convertTo(result, format)
 
         response.getOutputStream().println(result)
+    }
+
+
+    private Map deepMerge (Map... maps) {
+        Map result
+
+        if (maps.length == 0) {
+            result = [:]
+        } else if (maps.length == 1) {
+            result = maps[0]
+        } else {
+            result = [:]
+            maps.each { map ->
+                map.each { k, v ->
+                    result[k] = result[k] instanceof Map ? deepMerge(result[k], v) : v
+                }
+            }
+        }
+        result
     }
 
     private getConfig (appName, profile, label , HttpServletResponse response){
