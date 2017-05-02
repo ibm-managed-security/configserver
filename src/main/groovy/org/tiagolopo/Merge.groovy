@@ -59,47 +59,40 @@ class Merge {
             String label=null,
             String format=null ) {
 
-        def result
 
-        ExecutorService es = Executors.newFixedThreadPool(10)
-        LinkedList profiles = profile.split(',')
-        LinkedList cfgList
-        LinkedList taskList = []
+        def result = getConfig(appName, getDefaultProfiles(profile), label, response)
 
-        if ( profiles[0] != 'default' ){
-            profiles.addFirst('default')
-        }
+        result = deepMerge( *(result.reverse()) )
 
-        profiles.each { p ->
-            taskList.push ( { getConfig(appName, p, label, response) } as Callable)
-            taskList.push ( { getConfig(appName, "${p}-secret", label, response) } as Callable)
-        }
-
-        cfgList = es.invokeAll(taskList)
-        es.shutdown()
-
-        result = deepMerge( *(cfgList.collect{it.get()}) )
         result = convertTo(result, format)
         response.getOutputStream().println(result)
     }
 
-
-    private Map deepMerge (Map... maps) {
-        Map result
-
-        if (maps.length == 0) {
-            result = [:]
-        } else if (maps.length == 1) {
-            result = maps[0]
-        } else {
-            result = [:]
-            maps.each { map ->
-                map.each { k, v ->
-                    result[k] = result[k] instanceof Map ? deepMerge(result[k], v) : v
-                }
+    private Map deepMerge(Map onto, Map... overrides) {
+        if (!overrides)
+            return onto
+        else if (overrides.length == 1) {
+            overrides[0]?.each { k, v ->
+                if (v instanceof Map && onto[k] instanceof Map)
+                    deepMerge((Map) onto[k], (Map) v)
+                else
+                    onto[k] = v
             }
+            return onto
         }
-        result
+        return overrides.inject(onto, { acc, override -> deepMerge(acc, override ?: [:]) })
+    }
+
+    private String getDefaultProfiles ( String profile) {
+        def list = profile.split(',') as Queue
+        def result = ['default', 'default-secret' ] as LinkedList
+        list[0] == 'default' && { list.poll() }()
+        list[0] == 'default-secret' && { list.poll() }()
+        list.each { e ->
+            result.push e
+            result.push "${e}-secret"
+        }
+        result.join(',')
     }
 
     private getConfig (appName, profile, label , HttpServletResponse response){
@@ -122,27 +115,39 @@ class Merge {
             return
         }
 
+        def result = []
         def data = resp ? resp.data : null
         if (data && data.propertySources) {
-            return data.propertySources[0].source
+            data.propertySources.each {
+                def obj = it.source
+                obj = new Flatter().flat(obj)
+                obj = new Deflatter(obj).deflat()
+                result.push obj
+            }
         }
-        return {}
+        return result
     }
 
     private String convertTo (Object obj, String format){
         if (!obj) { return '{}' }
         format = format ?: 'json'
-        def result = new Flatter().flat(obj)
-        if ( format.toLowerCase() == 'json' ) {
-            result = new Deflatter(result).deflat()
-            result = JsonOutput.toJson(result)
-        }else if (format.toLowerCase() == 'yaml' || format.toLowerCase() == 'yml' )  {
-            result = new Deflatter(result).deflat()
-            DumperOptions options = new DumperOptions()
-            options.explicitStart = true
-            options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK)
-            result = new Yaml(options).dump(result)
+        if (format.toLowerCase() == 'yaml' || format.toLowerCase() == 'yml' )  {
+            return yamlDump(obj)
+        }else if (format.toLowerCase() == 'properties' ) {
+            return new Flatter().flat(obj)
+        }else {
+            return jsonDump(obj)
         }
-        result
+    }
+
+    private String jsonDump(obj){
+        JsonOutput.prettyPrint(JsonOutput.toJson(obj))
+    }
+
+    private String yamlDump(obj){
+        DumperOptions options = new DumperOptions()
+        options.explicitStart = true
+        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK)
+        new Yaml(options).dump(obj)
     }
 }
