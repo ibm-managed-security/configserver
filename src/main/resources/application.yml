@@ -4,7 +4,7 @@ spring:
       server:
         git:
           force_pull: true
-          uri: file:/opt/configserver
+          uri: file:/opt/config-repo
           searchPaths:
             - config-store/**
           clone-on-start: true

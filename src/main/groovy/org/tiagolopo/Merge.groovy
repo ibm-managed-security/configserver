@@ -84,8 +84,11 @@ class Merge {
     }
 
     private String getDefaultProfiles ( String profile) {
-        def list = profile.split(',') as Queue
-        def result = ['default', 'default-secret' ] as LinkedList
+        LinkedList list = profile.split(',')
+        list = list as Queue
+
+        LinkedList result = ['default', 'default-secret' ]
+
         list[0] == 'default' && { list.poll() }()
         list[0] == 'default-secret' && { list.poll() }()
         list.each { e ->
