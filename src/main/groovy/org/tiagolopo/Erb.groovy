@@ -22,18 +22,45 @@ class Erb {
     String baseLocalUrl
 
     @ResponseBody
-    @RequestMapping(value = "/erb", method = RequestMethod.GET)
-    void erb(
-            @RequestParam( value= 'format', required = false ) String format,
+    @RequestMapping(value = "/template/{appName}/{profiles}/{erbFile}", method = RequestMethod.GET)
+    void endPointTemplate(
+            @PathVariable("appName") String appName,
+            @PathVariable("erbFile") String erbFile,
+            @PathVariable("profiles") String profiles,
+            @RequestParam( value= 'label', required = false ) String label,
             HttpServletRequest request,
             HttpServletResponse response) {
-        
-        response.getOutputStream().println(fromRuby())
 
+        label = label?: 'master'
+
+        println("---------------> ${erbFile}")
+        def databag = getDataBag(appName,profiles,label)
+
+        //def template = 'var = <%=node["curl"]["config"]["retries"]%>'
+        def template = getTemplate(label, erbFile)
+
+        def parsed = ErbParser.parse(databag,template)
+        response.getOutputStream().println(parsed)
     }
 
-    private String fromRuby () {
-        ErbParser.parse('{"foo":"bar"}','<%=node["foo"]%>')
+    String getDataBag (String appName, String profiles, String label) {
+        baseLocalUrl = "http://localhost:${serverPort}"
+        String path = "/merge/${appName}/${profiles}"
+        path += label ? "/${label}" : ''
+
+        RESTClient rc = new RESTClient(baseLocalUrl)
+
+        println "Hitting: ${path}"
+        def resp = rc.get(path: path)
+        resp.data.text
     }
 
+    String getTemplate (String label='master', String erbFile) {
+        baseLocalUrl = "http://localhost:${serverPort}"
+        String path = "/cfg/templates/default/${label}/${erbFile}.erb"
+        RESTClient rc = new RESTClient(baseLocalUrl)
+        println "Hitting: ${path}"
+        def resp = rc.get(path: path)
+        resp.data.text
+    }
 }
