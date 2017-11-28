@@ -1,15 +1,20 @@
 package org.tiagolopo
 
 import groovyx.net.http.RESTClient
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.bind.annotation.*
 import org.tiagolopo.utils.ErbParser
 
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+import groovy.json.JsonOutput
 
 @RestController
 class Erb {
+
+    @Autowired
+    Merge merge
 
     @Value('${server.port ?: 8080}')
     Integer serverPort
@@ -35,16 +40,13 @@ class Erb {
         response.getOutputStream().println(parsed)
     }
 
+    private String jsonDump(obj){
+        JsonOutput.prettyPrint(JsonOutput.toJson(obj))
+    }
+
     String getDataBag (String appName, String profiles, String label) {
-        baseLocalUrl = "http://localhost:${serverPort}"
-        String path = "/merge/${appName}/${profiles}"
-        path += label ? "/${label}" : ''
-
-        RESTClient rc = new RESTClient(baseLocalUrl)
-
-        println "Hitting: ${path}"
-        def resp = rc.get(path: path)
-        resp.data.text
+        def merged = merge.getMerged(appName,profiles,label)
+        return jsonDump(merged)
     }
 
     String getTemplate (String label='master', String erbFile) {

@@ -1,6 +1,11 @@
 package org.tiagolopo
 
+import ch.qos.logback.core.net.AutoFlushingObjectWriter
+import org.apache.catalina.connector.Response
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cloud.config.environment.Environment
+import org.springframework.cloud.config.server.environment.EnvironmentController
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
@@ -17,12 +22,17 @@ import org.tiagolopo.utils.Deflatter
 import org.tiagolopo.utils.Flatter
 import org.yaml.snakeyaml.Yaml
 
+import org.springframework.cloud.config.server.resource.ResourceController
+
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 @RestController
 class Merge {
+
+    @Autowired
+    EnvironmentController environmentController
 
     @Value('${server.port ?: 8080}')
     Integer serverPort
@@ -60,12 +70,17 @@ class Merge {
             String format=null ) {
 
 
-        def result = getConfig(appName, getDefaultProfiles(profile), label, response)
+        def result = getMerged(appName, profile, label)
 
-        result = deepMerge( *(result.reverse()) )
 
         result = convertTo(result, format)
         response.getOutputStream().println(result)
+    }
+
+    Object getMerged (String appName,  String profile, String label) {
+        def result = getConfigFromController(appName, getDefaultProfiles(profile), label)
+        result = deepMerge( *(result.reverse()) )
+        return result
     }
 
     private Map deepMerge(Map onto, Map... overrides) {
@@ -98,36 +113,16 @@ class Merge {
         result.join(',')
     }
 
-    private getConfig (appName, profile, label , HttpServletResponse response){
-        baseLocalUrl = "http://localhost:${serverPort}"
-        String path = "/cfg/${appName}/${profile}"
-        path += label ? "/${label}" : ''
 
-        RESTClient rc = new RESTClient(baseLocalUrl)
-        def resp
-        try {
-            println "Hitting: ${path}"
-            resp = rc.get(path: path)
-        }catch(ex){
-            println "Failed to hit ${baseLocalUrl}/${path}"
-            if(ex.response) {
-                response.setStatus(ex.response.status)
-                response.getOutputStream().println( JsonOutput.toJson(ex.response.data) )
-            }
-            ex.printStackTrace()
-            return
-        }
-
+    private getConfigFromController (appName, profile, label) {
+        def env = environmentController.labelled(appName,profile,label)
         def result = []
-        def data = resp ? resp.data : null
-        if (data && data.propertySources) {
-            data.propertySources.each {
+            env.propertySources.each {
                 def obj = it.source
                 obj = new Flatter().flat(obj)
                 obj = new Deflatter(obj).deflat()
                 result.push obj
             }
-        }
         return result
     }
 
