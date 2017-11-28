@@ -1,10 +1,7 @@
 package org.tiagolopo
 
-import ch.qos.logback.core.net.AutoFlushingObjectWriter
-import org.apache.catalina.connector.Response
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.cloud.config.environment.Environment
 import org.springframework.cloud.config.server.environment.EnvironmentController
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -16,17 +13,10 @@ import org.yaml.snakeyaml.DumperOptions
 
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import groovyx.net.http.RESTClient
 import groovy.json.JsonOutput
 import org.tiagolopo.utils.Deflatter
 import org.tiagolopo.utils.Flatter
 import org.yaml.snakeyaml.Yaml
-
-import org.springframework.cloud.config.server.resource.ResourceController
-
-import java.util.concurrent.Callable
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 @RestController
 class Merge {

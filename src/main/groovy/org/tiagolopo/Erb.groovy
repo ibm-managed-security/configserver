@@ -3,6 +3,7 @@ package org.tiagolopo
 import groovyx.net.http.RESTClient
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cloud.config.server.resource.ResourceController
 import org.springframework.web.bind.annotation.*
 import org.tiagolopo.utils.ErbParser
 
@@ -15,6 +16,9 @@ class Erb {
 
     @Autowired
     Merge merge
+
+    @Autowired
+    ResourceController resourceController
 
     @Value('${server.port ?: 8080}')
     Integer serverPort
@@ -49,12 +53,8 @@ class Erb {
         return jsonDump(merged)
     }
 
-    String getTemplate (String label='master', String erbFile) {
-        baseLocalUrl = "http://localhost:${serverPort}"
-        String path = "/cfg/templates/default/${label}/${erbFile}.erb"
-        RESTClient rc = new RESTClient(baseLocalUrl)
-        println "Hitting: ${path}"
-        def resp = rc.get(path: path)
-        resp.data.text
+    private getTemplate (String label = 'master', String erbFile) {
+        return resourceController.resolve('templates','default',label,"${erbFile}.erb")
     }
+
 }
