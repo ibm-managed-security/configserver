@@ -6,7 +6,7 @@ class Flatter {
     def hash = [:]
 
     def flat (e, String name='', _stack=[]) {
-       stack = _stack
+        stack = _stack
         if (e.getClass().toString().toLowerCase().contains('map') && e.size() > 0 ){
             def counter = 0
             e.each { k,v ->
@@ -24,19 +24,17 @@ class Flatter {
                 counter == e.size() - 1 && stack &&  stack.pop()
                 counter ++  
             }
-	}else {
-            hash[stack.join('')]  = e
-            stack && stack.pop()
+		}else {
+	            hash[stack.join('')]  = e
+	            stack && stack.pop()
         }
 
         def result = ''
-        hash.each {k,v -> 
+        hash.each {k,v ->
             result += "${k}: ${v}\n"
         }
         result
     }
-
-
 }
 
 //fromJson = new JsonSlurper().parseText(System.in.text)
