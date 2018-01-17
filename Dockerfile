@@ -7,7 +7,7 @@ RUN apk update \
         ca-certificates \
         ruby ruby-irb bash curl\
         ruby-dev wget gnupg git\
-        python2\
+        python2 supervisor openssl grep util-linux\
  && apk add --no-cache --virtual .build-deps \
         build-base \
         ruby-dev wget gnupg \
@@ -23,4 +23,12 @@ RUN apk update \
  && rm -rf /var/cache/apk/* \
  && rm -rf /tmp/* /var/tmp/* /usr/lib/ruby/gems/*/cache/*.gem
 
+ADD scripts /opt/scripts
 
+ADD supervisord.conf /etc/supervisor/supervisord.conf
+
+ADD build/libs/*.jar /opt/configserver.jar
+
+ENTRYPOINT ["supervisord"]
+
+CMD ["-c", "/etc/supervisor/supervisord.conf"]
