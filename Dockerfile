@@ -6,7 +6,7 @@ RUN apk update \
  && apk add --no-cache \
         ca-certificates \
         ruby ruby-irb bash curl\
-        ruby-dev wget gnupg git\
+        ruby-dev wget gnupg git openssh-client\
         python2 supervisor openssl grep util-linux\
  && apk add --no-cache --virtual .build-deps \
         build-base \
@@ -21,7 +21,11 @@ RUN apk update \
  && apk del .build-deps \
  && (cd /opt && git clone https://github.com/elasticdog/transcrypt.git && ln -s /opt/transcrypt/transcrypt /sbin/transcrypt)\
  && rm -rf /var/cache/apk/* \
- && rm -rf /tmp/* /var/tmp/* /usr/lib/ruby/gems/*/cache/*.gem
+ && rm -rf /tmp/* /var/tmp/* /usr/lib/ruby/gems/*/cache/*.gem\
+ && mkdir -p /root/.ssh\
+ && echo 'StrictHostKeyChecking no' >> /root/.ssh/config\
+ && echo 'GlobalKnownHostsFile /dev/null' >> /root/.ssh/config\
+ && echo 'UserKnownHostsFile /dev/null' >> /root/.ssh/config
 
 ADD scripts /opt/scripts
 
