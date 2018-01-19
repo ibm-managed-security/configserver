@@ -14,8 +14,18 @@ spring:
           enabled: false
 
 
-#server.port: 8080
-
+server:
+  port: 8080
+  ssl:
+    enabled: true
+    key-store: /opt/ssl/keystore.p12
+    key-store-password: abc123
+    keyStoreType: PKCS12
+    keyAlias: configserver
+    ciphers: ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_RSA_WITH_AES_256_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA
+    protocol: TLS
+    client-auth: want
+    
 management:
     security:
       enabled: false
