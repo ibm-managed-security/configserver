@@ -29,7 +29,7 @@ class Merge {
     String baseLocalUrl
 
     @ResponseBody
-    @RequestMapping(value = "/merge/{appName}/{profile}/{label}", method = RequestMethod.GET)
+    @RequestMapping(value = "/merge/{appName}/{profile}/{label:.+}", method = RequestMethod.GET)
     void merge(
             @PathVariable('appName') String appName,
             @PathVariable('profile') String profile,
