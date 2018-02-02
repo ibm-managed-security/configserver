@@ -1,4 +1,4 @@
-package org.tiagolopo.utils
+package com.ibm.utils
 
 import org.jruby.embed.ScriptingContainer
 import org.springframework.core.io.support.ResourcePatternResolver
