@@ -1,4 +1,4 @@
-package org.tiagolopo;
+package com.ibm;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

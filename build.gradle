@@ -1,44 +1,55 @@
+
 buildscript {
 	ext {
-		springBootVersion = '1.5.2.RELEASE'
+		springBootVersion = '2.0.0.RC1'
 	}
 	repositories {
 		mavenCentral()
+		maven { url "https://repo.spring.io/snapshot" }
+		maven { url "https://repo.spring.io/milestone" }
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-		classpath('org.codehaus.groovy.modules.http-builder:http-builder:0.7.1')
 	}
 }
 
 apply plugin: 'groovy'
-apply plugin: 'idea'
 apply plugin: 'java'
-apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
 
+group = 'com.ibm'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
 
 repositories {
 	mavenCentral()
+	maven { url "https://repo.spring.io/snapshot" }
+	maven { url "https://repo.spring.io/milestone" }
 }
 
 
+ext {
+	springCloudVersion = 'Finchley.BUILD-SNAPSHOT'
+}
+
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-actuator')
-	compile('org.springframework.cloud:spring-cloud-config-server:1.2.3.RELEASE')
-	compile('org.springframework.boot:spring-boot-starter-groovy-templates')
+	compile('org.springframework.cloud:spring-cloud-config-server')
 	compile('org.springframework.boot:spring-boot-starter-web')
-	compile('org.codehaus.groovy.modules.http-builder:http-builder:0.7.1')
+	compile('org.springframework.boot:spring-boot-starter-groovy-templates')
 	compile('org.codehaus.groovy:groovy-all')
-	compile('org.yaml:snakeyaml:1.18')
-        compile('org.jruby:jruby-complete:9.1.14.0')
+	compile('org.jruby:jruby-complete:9.1.14.0')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
 dependencyManagement {
 	imports {
-		mavenBom "org.springframework.cloud:spring-cloud-dependencies:Dalston.RELEASE"
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
 	}
 }
+
+
+
+
+

@@ -1,4 +1,4 @@
-package org.tiagolopo.utils
+package com.ibm.utils
 
 class Flatter {
 
