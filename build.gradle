@@ -38,6 +38,7 @@ dependencies {
 	compile('org.springframework.cloud:spring-cloud-config-server')
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.springframework.boot:spring-boot-starter-groovy-templates')
+        compile("org.springframework.boot:spring-boot-starter-security")
 	compile('org.codehaus.groovy:groovy-all')
 	compile('org.jruby:jruby-complete:9.1.14.0')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
