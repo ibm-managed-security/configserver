@@ -13,7 +13,7 @@ class ConfigAuth extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         // Require role dev for .*-dev.*
         // Require role prod for .*-prod.*
-        http.authorizeRequests()
+        http.csrf().disable().authorizeRequests()
                 .regexMatchers(".*-prod.*").hasRole("prod")
                 .regexMatchers(".*-dev.*").hasRole("dev")
                 .anyRequest()
