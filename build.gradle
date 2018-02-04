@@ -34,14 +34,14 @@ ext {
 }
 
 dependencies {
-	compile('org.springframework.boot:spring-boot-starter-actuator')
-	compile('org.springframework.cloud:spring-cloud-config-server')
-	compile('org.springframework.boot:spring-boot-starter-web')
-	compile('org.springframework.boot:spring-boot-starter-groovy-templates')
-        compile("org.springframework.boot:spring-boot-starter-security")
-	compile('org.codehaus.groovy:groovy-all')
+	compile('org.springframework.cloud:spring-cloud-config-server:1.4.1.RELEASE')
+	compile('org.springframework.boot:spring-boot-starter-actuator:2.0.0.RC1')
+	compile('org.springframework.boot:spring-boot-starter-web:2.0.0.RC1')
+	compile('org.springframework.boot:spring-boot-starter-groovy-templates:2.0.0.RC1')
+        compile("org.springframework.boot:spring-boot-starter-security:2.0.0.RC1")
+	testCompile('org.springframework.boot:spring-boot-starter-test:2.0.0.RC1')
+	compile('org.codehaus.groovy:groovy-all:2.4.13')
 	compile('org.jruby:jruby-complete:9.1.14.0')
-	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
 dependencyManagement {
