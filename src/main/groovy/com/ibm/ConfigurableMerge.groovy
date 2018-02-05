@@ -116,6 +116,8 @@ class ConfigurableMerge {
                 map = new Deflatter(flat).deflat()
                 break
             case ConfigFormat.JSON:
+                map = Json.load(config.content)
+                break
             case ConfigFormat.YAML:
             case ConfigFormat.YML:
                 map = Yaml.load(config.content)
