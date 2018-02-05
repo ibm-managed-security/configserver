@@ -1,6 +1,7 @@
 package com.ibm
 
 import com.ibm.utils.Merger
+import com.ibm.utils.Yaml
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.config.server.resource.NoSuchResourceException
 import org.springframework.web.bind.annotation.PathVariable
@@ -9,8 +10,6 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
-import org.yaml.snakeyaml.DumperOptions
-import org.yaml.snakeyaml.Yaml
 
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -77,7 +76,7 @@ class Merge {
         switch(outputFormat) {
             case ConfigFormat.YML:
             case ConfigFormat.YAML:
-                content = yamlDump(merged)
+                content = Yaml.dump(merged)
             default:
                 break
         }
@@ -89,13 +88,9 @@ class Merge {
         switch (config.format){
             case ConfigFormat.YAML:
             case ConfigFormat.YML:
-                map = getMapFromYaml(config.content)
+                map = Yaml.load(config.content)
         }
         map
-    }
-
-    private Map getMapFromYaml(String yaml) {
-        new Yaml().load(yaml)
     }
 
     /**
@@ -117,12 +112,5 @@ class Merge {
             result.push "${e}-secret"
         }
         return result
-    }
-
-    private String yamlDump(obj){
-        DumperOptions options = new DumperOptions()
-        options.explicitStart = true
-        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK)
-        new Yaml(options).dump(obj)
     }
 }
