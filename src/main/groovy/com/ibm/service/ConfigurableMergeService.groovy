@@ -1,5 +1,6 @@
-package com.ibm
+package com.ibm.service
 
+import com.ibm.controller.ConfigurableMerge
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service

@@ -1,5 +1,6 @@
-package com.ibm
+package com.ibm.controller
 
+import com.ibm.controller.Merge
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cloud.config.server.resource.ResourceController

@@ -1,5 +1,7 @@
-package com.ibm
+package com.ibm.service
 
+import com.ibm.entity.Config
+import com.ibm.entity.ConfigFormat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable

@@ -1,4 +1,4 @@
-package com.ibm
+package com.ibm.auth
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
