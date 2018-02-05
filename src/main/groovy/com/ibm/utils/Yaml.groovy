@@ -10,7 +10,7 @@ class Yaml {
         new org.yaml.snakeyaml.Yaml(options).dump(obj)
     }
 
-    static Map<String,Object> load (String str){
+    static Object load (String str){
         new org.yaml.snakeyaml.Yaml().load(str)
     }
 }

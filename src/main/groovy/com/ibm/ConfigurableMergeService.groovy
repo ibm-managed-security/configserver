@@ -34,6 +34,8 @@ class ConfigurableMergeService {
                                 HttpServletResponse,
                                 String,
                                 String,
+                                String,
+                                String,
                                 String
                         )
                 )
