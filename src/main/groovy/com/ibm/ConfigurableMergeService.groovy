@@ -23,7 +23,7 @@ class ConfigurableMergeService {
         RequestMappingInfo requestMappingInfo = RequestMappingInfo
                 .paths(urlPath)
                 .methods(RequestMethod.GET)
-                .produces(MediaType.APPLICATION_JSON_VALUE)
+                .produces(MediaType.TEXT_PLAIN)
                 .build()
 
         requestMappingHandlerMapping.
