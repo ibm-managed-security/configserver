@@ -1,4 +1,4 @@
-package com.ibm.application
+package com.ibm
 
 import com.ibm.service.ConfigurableMergeService
 import org.slf4j.Logger

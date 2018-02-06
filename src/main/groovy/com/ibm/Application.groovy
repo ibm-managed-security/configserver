@@ -1,4 +1,4 @@
-package com.ibm.application
+package com.ibm
 
 import com.ibm.utils.Merger
 import org.springframework.core.io.support.ResourcePatternResolver

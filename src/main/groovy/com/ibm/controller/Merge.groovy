@@ -1,6 +1,6 @@
 package com.ibm.controller
 
-import com.ibm.application.Application
+import com.ibm.Application
 import com.ibm.entity.Config
 import com.ibm.entity.ConfigFormat
 import com.ibm.service.ConfigService
