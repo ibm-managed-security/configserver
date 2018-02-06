@@ -14,7 +14,7 @@ class ConfigService {
     @Autowired
     ResourceController resourceController
 
-    @Cacheable("configs")
+    @Cacheable(cacheResolver = "cacheResolver")
     public Config get(String name, String profile, String label, ConfigFormat format) {
         try {
             String content = resourceController.retrieve(name, profile, label, profile + "." + format.name().toLowerCase(), false)
@@ -27,8 +27,8 @@ class ConfigService {
     }
 
     //@Scheduled(fixedDelay = 30000) // Could use this to evict on a schedule
-    @CacheEvict(value="resources", allEntries=true)
-    public void clearCache() {
+    @CacheEvict(cacheResolver = "cacheResolver", allEntries=true)
+    public void clearCache(String name, String profile, String label, ConfigFormat format) {
         // Intentionally left blank
     }
 

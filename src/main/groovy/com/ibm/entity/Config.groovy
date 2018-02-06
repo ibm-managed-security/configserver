@@ -8,6 +8,10 @@ class Config {
     ConfigFormat format
     String content
 
+    Config() {
+
+    }
+
     Config(String name, String profile, String label, ConfigFormat format, String content) {
         this.format = format
         this.name = name

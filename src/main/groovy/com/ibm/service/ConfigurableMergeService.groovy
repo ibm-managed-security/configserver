@@ -1,6 +1,6 @@
 package com.ibm.service
 
-import com.ibm.controller.ConfigurableMerge
+import com.ibm.controller.Merge
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse
 @Service
 class ConfigurableMergeService {
     @Autowired
-    private ConfigurableMerge cm;
+    private Merge m;
 
     @Autowired
     private RequestMappingHandlerMapping requestMappingHandlerMapping;
@@ -24,13 +24,13 @@ class ConfigurableMergeService {
         RequestMappingInfo requestMappingInfo = RequestMappingInfo
                 .paths(urlPath)
                 .methods(RequestMethod.GET)
-                .produces(MediaType.TEXT_PLAIN)
+                .produces(MediaType.TEXT_PLAIN_VALUE)
                 .build()
 
         requestMappingHandlerMapping.
-                registerMapping(requestMappingInfo, cm,
-                        cm.class.getDeclaredMethod(
-                                'merge',
+                registerMapping(requestMappingInfo, m,
+                        m.class.getDeclaredMethod(
+                                'configurableMerge',
                                 HttpServletRequest,
                                 HttpServletResponse,
                                 String,
