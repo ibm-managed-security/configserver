@@ -5,8 +5,7 @@ spring:
         git:
           force_pull: true
           uri: file:/opt/config-repo
-          searchPaths:
-            - config-store/**
+          searchPaths: config-store/{application}
           clone-on-start: true
         prefix: cfg
         bootstrap: true
