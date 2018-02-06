@@ -59,4 +59,15 @@ class Config {
     void setContent(String content) {
         this.content = content
     }
+
+
+    @Override
+    public String toString() {
+        return "Config{" +
+                "name='" + name + '\'' +
+                ", profile='" + profile + '\'' +
+                ", label='" + label + '\'' +
+                ", format=" + format +
+                '}';
+    }
 }

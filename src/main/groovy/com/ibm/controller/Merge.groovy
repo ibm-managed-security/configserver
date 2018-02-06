@@ -172,7 +172,14 @@ class Merge {
     private List<Config> getConfigs(List<Config> configs, String label, boolean includeDefaultsAndSecrets, boolean clearCache) {
         List<Config> returnConfigs = new ArrayList<Config>()
         configs.each {
-            returnConfigs.addAll(getConfigs(it.name, [it.profile], label, includeDefaultsAndSecrets, clearCache))
+            try {
+                returnConfigs.addAll(getConfigs(it.name, [it.profile], label, includeDefaultsAndSecrets, clearCache))
+            } catch (NoSuchResourceException ex) {
+                // Do nothing
+            }
+        }
+        if (configs.size() == 0) {
+            throw new NoSuchResourceException("Unable to get configs matching: "+configs.join(", "))
         }
         returnConfigs
     }
