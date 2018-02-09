@@ -8,6 +8,7 @@ import com.ibm.utils.Deflatter
 import com.ibm.utils.Flatter
 import com.ibm.utils.Json
 import com.ibm.utils.Merger
+import com.ibm.utils.ReferenceResolver
 import com.ibm.utils.Yaml
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.config.server.resource.NoSuchResourceException
@@ -107,6 +108,7 @@ class Merge {
 
     private Config getMergedConfig(List<Config> configs, ConfigFormat outputFormat) {
         Map merged = Merger.deepMerge(*(configs.collect{getMapFromConfig(it)}.reverse()))
+        merged = ReferenceResolver.resolve(merged)
         String content = null
         switch(outputFormat) {
             case ConfigFormat.JSON:

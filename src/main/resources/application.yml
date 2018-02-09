@@ -13,6 +13,10 @@ spring:
         health:
           enabled: false
 
+logging:
+  level:
+    ROOT: INFO
+    org.springframework.cloud.config: DEBUG
 
 server:
   port: 8080
