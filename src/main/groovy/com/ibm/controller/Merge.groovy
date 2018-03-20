@@ -10,9 +10,11 @@ import com.ibm.utils.Json
 import com.ibm.utils.Merger
 import com.ibm.utils.ReferenceResolver
 import com.ibm.utils.Yaml
+import org.apache.commons.beanutils.PropertyUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.config.server.resource.NoSuchResourceException
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
@@ -30,36 +32,45 @@ class Merge {
     @Autowired
     ConfigService configService
 
-    @RequestMapping(value = "/merge/{name}/{profile}", method = RequestMethod.GET)
-    void merge(
+    @RequestMapping(value = "/merge", method = RequestMethod.GET)
+    void mergeGet(
             HttpServletRequest request,
             HttpServletResponse response,
-            @PathVariable('name') String name,
-            @PathVariable('profile') String profile,
             @RequestParam(value='format', required = false, defaultValue = "json") String format,
             @RequestParam(value='tag', required = false) String tag,
-            @RequestParam(value='branch', required = false) String branch
+            @RequestParam(value='branch', required = false) String branch,
+            @RequestParam(value='path', required = false) String path
     ) {
         def label = branch ?: tag
-        List<Config> configs = getConfigs(name, Arrays.asList(profile.split(",")), label, true, branch != null)
-        Config mergedConfig = getMergedConfig(configs, ConfigFormat.valueOf(format.toUpperCase()))
+        def reservedParams = ["format", "tag", "branch", "path"] as HashSet
+        List<Config> paramConfigs = new ArrayList<>()
+        request.getParameterNames().each { n ->
+            if (!reservedParams.contains(n)) {
+                paramConfigs.push(new Config(n, request.getParameter(n), label, null, null))
+            }
+        }
+
+        List<Config> configs = getConfigs(paramConfigs, label, true, branch != null)
+        Config mergedConfig = getMergedConfig(configs, ConfigFormat.valueOf(format.toUpperCase()), path)
         response.getOutputStream().println(mergedConfig.content)
     }
 
     @RequestMapping(value = "/merge", method = RequestMethod.POST)
-    void merge(
+    void mergePost(
             HttpServletRequest request,
             HttpServletResponse response,
             @RequestBody List<Config> postedConfigs,
             @RequestParam(value='format', required = false, defaultValue = "json") String format,
             @RequestParam(value='tag', required = false) String tag,
-            @RequestParam(value='branch', required = false) String branch
+            @RequestParam(value='branch', required = false) String branch,
+            @RequestParam(value='path', required = false) String path
     ) {
         def label = branch ?: tag
         List<Config> configs = getConfigs(postedConfigs, label, true, branch != null)
-        Config mergedConfig = getMergedConfig(configs, ConfigFormat.valueOf(format.toUpperCase()))
+        Config mergedConfig = getMergedConfig(configs, ConfigFormat.valueOf(format.toUpperCase()), path)
         response.getOutputStream().println(mergedConfig.content)
     }
+
 
     ResponseEntity<String> configurableMerge(
             HttpServletRequest request,
@@ -101,14 +112,20 @@ class Merge {
         response
         String str = mergedConfig.content
 
-        //return new ResponseEntity<>(HttpStatus.OK);
+
         return new ResponseEntity<String>(str, null, HttpStatus.OK)
     }
 
-
     private Config getMergedConfig(List<Config> configs, ConfigFormat outputFormat) {
-        Map merged = Merger.deepMerge(*(configs.collect{getMapFromConfig(it)}.reverse()))
+        return getMergedConfig(configs, outputFormat, null)
+    }
+
+    private Config getMergedConfig(List<Config> configs, ConfigFormat outputFormat, String path) {
+        def merged = Merger.deepMerge(*(configs.collect{getMapFromConfig(it)}.reverse()))
         merged = ReferenceResolver.resolve(merged)
+        if (path) {
+            merged = PropertyUtils.getNestedProperty(merged, path)
+        }
         String content = null
         switch(outputFormat) {
             case ConfigFormat.JSON:
@@ -116,6 +133,15 @@ class Merge {
                 break
             case ConfigFormat.PROPERTIES:
                 content = new Flatter().flat(merged)
+                break
+            case ConfigFormat.VALUE:
+                if (!path) {
+                    throw new IllegalArgumentException("A 'path' parameter is required for the 'value' format")
+                }
+                if ([Collection, Map, Object[]].any { it.isAssignableFrom(merged.getClass()) }) {
+                    throw new IllegalArgumentException("Collection, map or array returned for path '${path}' (should be a primitive value)")
+                }
+                content = merged
                 break
             case ConfigFormat.YML:
             case ConfigFormat.YAML:

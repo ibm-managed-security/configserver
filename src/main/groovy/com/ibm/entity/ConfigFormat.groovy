@@ -4,5 +4,6 @@ enum ConfigFormat {
     YAML,
     YML,
     JSON,
-    PROPERTIES
+    PROPERTIES,
+    VALUE
 }
