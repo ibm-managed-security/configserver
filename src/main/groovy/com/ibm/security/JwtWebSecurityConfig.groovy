@@ -1,7 +1,8 @@
-package com.ibm.auth
+package com.ibm.security
 
 import com.ibm.filter.ExceptionHandlerFilter
 import com.ibm.filter.JwtFilter
+import com.ibm.properties.JwtProperties
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.security.config.annotation.web.builders.HttpSecurity

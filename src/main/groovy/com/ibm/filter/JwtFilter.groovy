@@ -1,6 +1,6 @@
 package com.ibm.filter
 
-import com.ibm.auth.JwtProperties
+import com.ibm.properties.JwtProperties
 import io.jsonwebtoken.JwtException
 import org.springframework.web.filter.OncePerRequestFilter
 

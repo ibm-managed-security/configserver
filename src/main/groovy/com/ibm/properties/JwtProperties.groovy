@@ -1,4 +1,4 @@
-package com.ibm.auth
+package com.ibm.properties
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties("jwt")
