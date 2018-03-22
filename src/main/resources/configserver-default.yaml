@@ -1,9 +1,0 @@
----
-endpoints:
-  _merge:
-    path: /_merge/{name}/{profile}.{format}
-    merge:
-      - application: CURRENT
-        profiles:
-          - default
-          - default-secret

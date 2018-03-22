@@ -33,9 +33,5 @@ server:
 management:
     security:
       enabled: false
-application:
-  users:
-    - username: CSToken
-      password: r$42ip(8%z
-      roles:
-      - USER
+jwt:
+  signing-key: zTh8bPAEX_FJnF7Gc&F-xT+s87GHFHBQ
