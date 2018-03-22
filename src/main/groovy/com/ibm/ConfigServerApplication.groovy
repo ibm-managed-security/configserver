@@ -9,10 +9,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.cloud.config.server.EnableConfigServer
 import org.springframework.context.annotation.Bean
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 
 @EnableConfigServer
 @SpringBootApplication
 @EnableCaching
+@EnableGlobalMethodSecurity
 class ConfigServerApplication {
 	static private final Logger logger = LoggerFactory.getLogger(this.getClass())
 

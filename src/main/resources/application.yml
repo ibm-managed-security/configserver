@@ -33,3 +33,9 @@ server:
 management:
     security:
       enabled: false
+application:
+  users:
+    - username: CSToken
+      password: r$42ip(8%z
+      roles:
+      - USER
