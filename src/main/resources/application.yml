@@ -33,5 +33,9 @@ server:
 management:
     security:
       enabled: false
-jwt:
-  signing-key: zTh8bPAEX_FJnF7Gc&F-xT+s87GHFHBQ
+application:
+  users:
+    - username: apiuser
+      password: r$42ip(8%z
+      roles:
+      - USER
