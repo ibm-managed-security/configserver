@@ -1,5 +1,5 @@
-package com.ibm.properties
-class ApplicationUser {
+package com.ibm.auth
+class AuthUser {
     private String username;
     private String password;
     private String[] roles;

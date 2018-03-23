@@ -1,7 +1,5 @@
 package com.ibm.auth
 
-import com.ibm.properties.ApplicationProperties
-import com.ibm.properties.ApplicationUser
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -16,10 +14,9 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager
 
 @Configuration
 @EnableWebSecurity
-@EnableConfigurationProperties(ApplicationProperties.class)
 class BasicAuthConfig extends WebSecurityConfigurerAdapter {
     @Autowired
-    ApplicationProperties application;
+    AuthProperties authProperties;
 
     @Autowired
     private ApplicationBasicAuthenticationEntryPoint authenticationEntryPoint;
@@ -40,7 +37,7 @@ class BasicAuthConfig extends WebSecurityConfigurerAdapter {
     @Override
     UserDetailsService userDetailsService() {
         List<UserDetails> users = new ArrayList<>()
-        for (ApplicationUser user : application.getUsers()) {
+        for (AuthUser user : authProperties.getUsers()) {
             users.add(User.withDefaultPasswordEncoder()
                     .username(user.getUsername())
                     .password(user.getPassword())
