@@ -17,7 +17,7 @@ jobs:
       - export REPO=$(echo ${TRAVIS_REPO_SLUG} | cut -d"/" -f2)
       - export DOCKER_REPO="ibmmanagedsecurity/$REPO"
       - docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD"
-      - docker build -t $DOCKER_REPO:$TAG .
+      - docker build -t $DOCKER_REPO:$TRAVIS_BRANCH .
       - docker tag $DOCKER_REPO:$TAG $DOCKER_REPO:latest
       - docker images
       - docker push $DOCKER_REPO:$TAG
