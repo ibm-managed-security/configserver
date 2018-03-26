@@ -1,5 +1,7 @@
 package com.ibm.auth
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -15,6 +17,8 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager
 @Configuration
 @EnableWebSecurity
 class BasicAuthConfig extends WebSecurityConfigurerAdapter {
+    private static final Logger logger = LoggerFactory.getLogger(AuthProperties.class)
+
     @Autowired
     AuthProperties authProperties;
 
@@ -38,6 +42,7 @@ class BasicAuthConfig extends WebSecurityConfigurerAdapter {
     UserDetailsService userDetailsService() {
         List<UserDetails> users = new ArrayList<>()
         for (AuthUser user : authProperties.getUsers()) {
+            logger.info("Adding user ${user.getUsername()}")
             users.add(User.withDefaultPasswordEncoder()
                     .username(user.getUsername())
                     .password(user.getPassword())
