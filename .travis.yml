@@ -10,6 +10,7 @@ jobs:
   include:
     - stage: build docker image
       script:
+      - export REPO=$(echo ${TRAVIS_REPO_SLUG} | cut -d"/" -f2)
       - export DOCKER_REPO="ibmmanagedsecurity/$REPO"
       - docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD"
       - docker build -t $DOCKER_REPO:$COMMIT .
@@ -17,5 +18,5 @@ jobs:
       - docker tag $DOCKER_REPO:$COMMIT $DOCKER_REPO:$TAG
       - docker images
       - docker push $DOCKER_REPO:$TAG
-  on:
-    tags: true
+      on:
+        tags: true
