@@ -18,9 +18,9 @@ jobs:
       - export DOCKER_REPO="ibmmanagedsecurity/$REPO"
       - docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD"
       - docker build -t $DOCKER_REPO:$TRAVIS_BRANCH .
-      - docker tag $DOCKER_REPO:$TAG $DOCKER_REPO:latest
+      - docker tag $DOCKER_REPO:$TRAVIS_BRANCH $DOCKER_REPO:latest
       - docker images
-      - docker push $DOCKER_REPO:$TAG
+      - docker push $DOCKER_REPO:$TRAVIS_BRANCH
       - docker push $DOCKER_REPO:latest
       if: tag =~ ^v[0-9]
       on:
