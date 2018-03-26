@@ -40,6 +40,7 @@ class AuthProperties {
             logger.info("Using ${authYmlResource.getPath()} for authentication configuration")
             yaml.setResources(authYmlResource)
             propertySourcesPlaceholderConfigurer.setProperties(yaml.getObject())
+            logger.info("Got properties ${yaml.getObject()}")
         } catch (IllegalStateException e) {
             // do nothing
         } catch (Exception e) {

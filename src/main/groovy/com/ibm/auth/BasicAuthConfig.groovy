@@ -17,7 +17,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager
 @Configuration
 @EnableWebSecurity
 class BasicAuthConfig extends WebSecurityConfigurerAdapter {
-    private static final Logger logger = LoggerFactory.getLogger(AuthProperties.class)
+    private static final Logger logger = LoggerFactory.getLogger(BasicAuthConfig.class)
 
     @Autowired
     AuthProperties authProperties;
@@ -40,6 +40,7 @@ class BasicAuthConfig extends WebSecurityConfigurerAdapter {
     @Bean
     @Override
     UserDetailsService userDetailsService() {
+        logger.info("Building user details service")
         List<UserDetails> users = new ArrayList<>()
         for (AuthUser user : authProperties.getUsers()) {
             logger.info("Adding user ${user.getUsername()}")
