@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.FileSystemResource
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component
 
 
 @Component
+@Configuration
 @ConfigurationProperties
 class AuthProperties {
     private static final Logger logger = LoggerFactory.getLogger(AuthProperties.class)
@@ -39,12 +41,13 @@ class AuthProperties {
             }
             logger.info("Using ${authYmlResource.getPath()} for authentication configuration")
             yaml.setResources(authYmlResource)
-            propertySourcesPlaceholderConfigurer.setProperties(yaml.getObject())
             logger.info("Got properties ${yaml.getObject()}")
+            propertySourcesPlaceholderConfigurer.setProperties(yaml.getObject())
         } catch (IllegalStateException e) {
             // do nothing
+            logger.error(e)
         } catch (Exception e) {
-            e.printStackTrace()
+            logger.error(e)
         }
         return propertySourcesPlaceholderConfigurer;
     }
