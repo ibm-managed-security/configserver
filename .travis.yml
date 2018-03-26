@@ -1,0 +1,21 @@
+sudo: required
+
+services:
+  - docker
+env:
+  global:
+    - COMMIT=${TRAVIS_COMMIT::8}
+
+jobs:
+  include:
+    - stage: build docker image
+      script:
+      - export DOCKER_REPO="ibmmanagedsecurity/$REPO"
+      - docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD"
+      - docker build -t $DOCKER_REPO:$COMMIT .
+      - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
+      - docker tag $DOCKER_REPO:$COMMIT $DOCKER_REPO:$TAG
+      - docker images
+      - docker push $DOCKER_REPO:$TAG
+  on:
+    tags: true
