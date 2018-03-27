@@ -63,8 +63,9 @@ class ConfigService {
         List<Resource> resources = this.myResourceRepository.findMultiple(name, profiles, label, paths)
         for(Resource r: resources) {
             String extension = StringUtils.getFilenameExtension(r.getFilename())
+            String profile = StringUtils.stripFilenameExtension(r.getFilename())
             ConfigFormat format = ConfigFormat.valueOf(extension.toUpperCase())
-            configs.push(new Config(name, profiles, label, format, StreamUtils.copyToString(r.getInputStream(), Charset.forName("UTF-8"))))
+            configs.push(new Config(name, profile, label, format, StreamUtils.copyToString(r.getInputStream(), Charset.forName("UTF-8"))))
         }
         return configs
     }
