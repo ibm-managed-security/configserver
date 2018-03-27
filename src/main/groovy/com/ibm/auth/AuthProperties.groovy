@@ -44,10 +44,9 @@ class AuthProperties {
             logger.info("Got properties ${yaml.getObject()}")
             propertySourcesPlaceholderConfigurer.setProperties(yaml.getObject())
         } catch (IllegalStateException e) {
-            // do nothing
-            logger.error(e)
+            logger.warn(e.getMessage())
         } catch (Exception e) {
-            logger.error(e)
+            logger.error(e.getMessage())
         }
         return propertySourcesPlaceholderConfigurer;
     }

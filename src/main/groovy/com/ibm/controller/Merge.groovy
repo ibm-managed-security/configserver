@@ -10,25 +10,27 @@ import com.ibm.utils.Merger
 import com.ibm.utils.ReferenceResolver
 import com.ibm.utils.Yaml
 import org.apache.commons.beanutils.PropertyUtils
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cloud.config.server.environment.EnvironmentRepository
 import org.springframework.cloud.config.server.resource.NoSuchResourceException
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
+import org.springframework.cloud.config.server.resource.ResourceRepository
 import org.springframework.security.access.annotation.Secured
-import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
-import javax.annotation.security.RolesAllowed
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @RestController
 class Merge {
+
+    private static final Logger logger = LoggerFactory.getLogger(Merge.class)
+
 
     @Autowired
     ConfigService configService
@@ -43,6 +45,9 @@ class Merge {
             @RequestParam(value='branch', required = false) String branch,
             @RequestParam(value='path', required = false) String path
     ) {
+        if (!branch && !tag) {
+            throw new IllegalArgumentException("Either 'branch' or 'tag' are required.")
+        }
         def label = branch ?: tag
         def reservedParams = ["format", "tag", "branch", "path"] as HashSet
         List<Config> paramConfigs = new ArrayList<>()
@@ -51,7 +56,6 @@ class Merge {
                 paramConfigs.push(new Config(n, request.getParameter(n), label, null, null))
             }
         }
-
         List<Config> configs = getConfigs(paramConfigs, label, true, branch != null)
         Config mergedConfig = getMergedConfig(configs, ConfigFormat.valueOf(format.toUpperCase()), path)
         response.getOutputStream().println(mergedConfig.content)
@@ -68,6 +72,9 @@ class Merge {
             @RequestParam(value='branch', required = false) String branch,
             @RequestParam(value='path', required = false) String path
     ) {
+        if (!branch && !tag) {
+            throw new IllegalArgumentException("Either 'branch' or 'tag' are required.")
+        }
         def label = branch ?: tag
         List<Config> configs = getConfigs(postedConfigs, label, true, branch != null)
         Config mergedConfig = getMergedConfig(configs, ConfigFormat.valueOf(format.toUpperCase()), path)
@@ -172,18 +179,18 @@ class Merge {
         }
 
         List<Config> configs = new ArrayList<Config>()
-        profiles.each { profile ->
-            for (ConfigFormat format : ConfigFormat.values()) {
-                if (clearCache) {
-                    configService.clearCache(name, profile, label, format)
-                }
-                Config config = configService.get(name, profile, label, format)
-                if (config) {
-                    configs.push(config)
-                    break
-                }
+//        profiles.each { profile ->
+            if (clearCache) {
+                configService.clearCache(name, profiles.join(","), label, ConfigFormat.values()    )
             }
-        }
+            long t1 = System.currentTimeMillis()
+            List<Config> newConfigs = configService.get(name, profiles.join(","), label, ConfigFormat.values())
+            logger.debug("Get configs ${name}:${profiles.join(",")}:${label} took ${System.currentTimeMillis()-t1}ms")
+
+            if (newConfigs) {
+                configs.addAll(newConfigs)
+            }
+//        }
         if (configs.size() == 0) {
             throw new NoSuchResourceException("Unable to get configs for name: ${name} profile: ${profiles.join(",")} label: ${label}")
         }
