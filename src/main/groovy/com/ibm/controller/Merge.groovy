@@ -2,7 +2,7 @@ package com.ibm.controller
 
 import com.ibm.entity.Config
 import com.ibm.entity.ConfigFormat
-import com.ibm.service.ConfigService
+import com.ibm.service.TTLConfigService
 import com.ibm.utils.Deflatter
 import com.ibm.utils.Flatter
 import com.ibm.utils.Json
@@ -13,9 +13,7 @@ import org.apache.commons.beanutils.PropertyUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.cloud.config.server.environment.EnvironmentRepository
 import org.springframework.cloud.config.server.resource.NoSuchResourceException
-import org.springframework.cloud.config.server.resource.ResourceRepository
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -33,7 +31,7 @@ class Merge {
 
 
     @Autowired
-    ConfigService configService
+    TTLConfigService configService
 
     @RequestMapping(value = "/merge", method = RequestMethod.GET)
     @Secured(["ROLE_USER"])
@@ -179,18 +177,16 @@ class Merge {
         }
 
         List<Config> configs = new ArrayList<Config>()
-//        profiles.each { profile ->
-            if (clearCache) {
-                configService.clearCache(name, profiles.join(","), label, ConfigFormat.values()    )
-            }
-            long t1 = System.currentTimeMillis()
-            List<Config> newConfigs = configService.get(name, profiles.join(","), label, ConfigFormat.values())
-            logger.debug("Get configs ${name}:${profiles.join(",")}:${label} took ${System.currentTimeMillis()-t1}ms")
+        if (clearCache) {
+            configService.clearCacheWithTTL(name, profiles.join(","), label, ConfigFormat.values()    )
+        }
+        long t1 = System.currentTimeMillis()
+        List<Config> newConfigs = configService.get(name, profiles.join(","), label, ConfigFormat.values())
+        logger.debug("Get configs ${name}:${profiles.join(",")}:${label} took ${System.currentTimeMillis()-t1}ms")
 
-            if (newConfigs) {
-                configs.addAll(newConfigs)
-            }
-//        }
+        if (newConfigs) {
+            configs.addAll(newConfigs)
+        }
         if (configs.size() == 0) {
             throw new NoSuchResourceException("Unable to get configs for name: ${name} profile: ${profiles.join(",")} label: ${label}")
         }

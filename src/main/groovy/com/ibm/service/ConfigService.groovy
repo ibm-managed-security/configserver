@@ -38,7 +38,7 @@ class ConfigService {
 
 
     @Cacheable(cacheResolver = "cacheResolver")
-    List<Config> get(String name, String profiles, String label, ConfigFormat[] formats) {
+    synchronized List<Config> get(String name, String profiles, String label, ConfigFormat[] formats) {
         long t1 = System.currentTimeMillis()
 
         List<String> paths = []
