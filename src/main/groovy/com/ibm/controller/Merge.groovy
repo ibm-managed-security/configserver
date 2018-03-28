@@ -80,7 +80,7 @@ class Merge {
     }
 
     private Config getMergedConfig(List<Config> configs, ConfigFormat outputFormat, String path) {
-        def merged = Merger.deepMerge(*(configs.collect{getMapFromConfig(it)}.reverse()))
+        def merged = Merger.deepMerge(*(configs.collect{getMapFromConfig(it)}))
         merged = ReferenceResolver.resolve(merged)
         if (path) {
             merged = PropertyUtils.getNestedProperty(merged, path)

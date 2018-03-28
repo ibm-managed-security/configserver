@@ -1,18 +1,15 @@
 package com.ibm.utils
 
 class Merger {
-    static Map deepMerge(Map onto, Map... overrides) {
-        if (!overrides)
-            return onto
-        else if (overrides.length == 1) {
-            overrides[0]?.each { k, v ->
-                if (v instanceof Map && onto[k] instanceof Map)
-                    deepMerge((Map) onto[k], (Map) v)
-                else
-                    onto[k] = v
+    static Map deepMerge(Map ... sources) {
+        if (sources.length == 0) return [:]
+        if (sources.length == 1) return sources[0]
+
+        sources.inject([:]) { result, source ->
+            source.each { k, v ->
+                result[k] = result[k] instanceof Map ? deepMerge(result[k], v) : v
             }
-            return onto
+            result
         }
-        return overrides.inject(onto, { acc, override -> deepMerge(acc, override ?: [:]) })
     }
 }
