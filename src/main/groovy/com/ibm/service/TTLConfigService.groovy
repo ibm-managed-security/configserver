@@ -23,7 +23,8 @@ class TTLConfigService {
     private static final Logger logger = LoggerFactory.getLogger(TTLConfigService.class)
 
     private static Map<String, Long> lastCacheClears = new HashMap<>()
-    private static int ttlSeconds = 15
+    // @TODO Make this configurable. Likely swapping auth.yml out for config.yml or something.
+    private static int ttlSeconds = 60
 
     String getCacheClearKey(String name, String profile, String label, ConfigFormat[] formats) {
         return name + profile + label + formats.join("_")
