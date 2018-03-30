@@ -7,17 +7,19 @@ class Config {
     String label
     ConfigFormat format
     String content
+    Object object
 
     Config() {
 
     }
 
-    Config(String name, String profile, String label, ConfigFormat format, String content) {
+    Config(String name, String profile, String label, ConfigFormat format, String content, Object object) {
         this.format = format
         this.name = name
         this.profile = profile
         this.label = label
         this.content = content
+        this.object = object
     }
 
     String getName() {
@@ -59,6 +61,15 @@ class Config {
     void setContent(String content) {
         this.content = content
     }
+
+    Object getObject() {
+        return object
+    }
+
+    void setObject(Object map) {
+        this.object = map
+    }
+
 
 
     @Override

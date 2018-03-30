@@ -1,9 +1,9 @@
 package com.ibm.controller
 
 import com.ibm.entity.Config
+import com.ibm.entity.ConfigFactory
 import com.ibm.entity.ConfigFormat
 import com.ibm.service.TTLConfigService
-import com.ibm.utils.Deflatter
 import com.ibm.utils.Flatter
 import com.ibm.utils.Json
 import com.ibm.utils.Merger
@@ -33,6 +33,10 @@ class Merge {
     @Autowired
     TTLConfigService configService
 
+    @Autowired
+    private ConfigFactory configFactory
+
+
     @RequestMapping(value = "/merge", method = RequestMethod.GET)
     @Secured(["ROLE_USER"])
     void mergeGet(
@@ -43,6 +47,7 @@ class Merge {
             @RequestParam(value='branch', required = false) String branch,
             @RequestParam(value='path', required = false) String path
     ) {
+        long t1 = System.currentTimeMillis()
         if (!branch && !tag) {
             throw new IllegalArgumentException("Either 'branch' or 'tag' are required.")
         }
@@ -51,12 +56,14 @@ class Merge {
         List<Config> paramConfigs = new ArrayList<>()
         request.getParameterNames().each { n ->
             if (!reservedParams.contains(n)) {
-                paramConfigs.push(new Config(n, request.getParameter(n), label, null, null))
+                paramConfigs.push(configFactory.create(n, request.getParameter(n), label, null, null, null))
             }
         }
         List<Config> configs = getConfigs(paramConfigs, label, true, branch != null)
         Config mergedConfig = getMergedConfig(configs, ConfigFormat.valueOf(format.toUpperCase()), path)
         response.getOutputStream().println(mergedConfig.content)
+        logger.info("mergeGet took ${System.currentTimeMillis()-t1}ms")
+
     }
 
     @RequestMapping(value = "/merge", method = RequestMethod.POST)
@@ -80,60 +87,23 @@ class Merge {
     }
 
     private Config getMergedConfig(List<Config> configs, ConfigFormat outputFormat, String path) {
-        def merged = Merger.deepMerge(*(configs.collect{getMapFromConfig(it)}))
+        long t1 = System.currentTimeMillis()
+        def merged = Merger.deepMerge(*(configs.collect{it.object}))
+        logger.info("Deep merge took ${System.currentTimeMillis()-t1}ms")
+        t1 = System.currentTimeMillis()
         merged = ReferenceResolver.resolve(merged)
-        if (path) {
+        logger.info("Reference resolver took ${System.currentTimeMillis()-t1}ms")
+        if (outputFormat == ConfigFormat.VALUE && !path) {
+            throw new IllegalArgumentException("A 'path' parameter is required for the 'value' format")
+        } else if (path) {
             merged = PropertyUtils.getNestedProperty(merged, path)
         }
-        String content = null
-        switch(outputFormat) {
-            case ConfigFormat.JSON:
-                content = Json.dump(merged)
-                break
-            case ConfigFormat.PROPERTIES:
-                content = new Flatter().flat(merged)
-                break
-            case ConfigFormat.VALUE:
-                if (!path) {
-                    throw new IllegalArgumentException("A 'path' parameter is required for the 'value' format")
-                }
-                if ([Collection, Map, Object[]].any { it.isAssignableFrom(merged.getClass()) }) {
-                    throw new IllegalArgumentException("Collection, map or array returned for path '${path}' (should be a primitive value)")
-                }
-                content = merged
-                break
-            case ConfigFormat.YML:
-            case ConfigFormat.YAML:
-                content = Yaml.dump(merged)
-            default:
-                break
-        }
-        return new Config(configs[0].name, "<merged ${configs.collect{it.profile}.join(",")}>", configs[0].label, outputFormat, content)
+        t1 = System.currentTimeMillis()
+        Config config = configFactory.createFromObject(configs[0].name, "<merged ${configs.collect{it.profile}.join(",")}>", configs[0].label, outputFormat, merged)
+        logger.info("Config create took ${System.currentTimeMillis()-t1}ms")
+        return config
     }
 
-    private Map getMapFromConfig(Config config) {
-        Map map = null
-        switch (config.format){
-            case ConfigFormat.PROPERTIES:
-                Properties p = new Properties()
-                p.load(new StringReader(config.content))
-
-                // We have to load the dump because it still behaves as properties
-                def obj = Json.load( Json.dump(p as Map))
-
-                String flat = new Flatter().flat(obj)
-                map = new Deflatter(flat).deflat()
-                break
-            case ConfigFormat.JSON:
-                map = Json.load(config.content)
-                break
-            case ConfigFormat.YAML:
-            case ConfigFormat.YML:
-                map = Yaml.load(config.content)
-                break
-        }
-        map
-    }
 
     /**
      * Populate a given list of profiles with default profiles and -secret suffixes
@@ -157,6 +127,7 @@ class Merge {
     }
 
     private List<Config> getConfigs(List<Config> configs, String label, boolean includeDefaultsAndSecrets, boolean clearCache) {
+        long t1 = System.currentTimeMillis()
         List<Config> returnConfigs = new ArrayList<Config>()
         configs.each {
             try {
@@ -168,6 +139,7 @@ class Merge {
         if (configs.size() == 0) {
             throw new NoSuchResourceException("Unable to get configs matching: "+configs.join(", "))
         }
+        logger.info("Get all configs took ${System.currentTimeMillis()-t1}ms")
         returnConfigs
     }
 
@@ -182,7 +154,7 @@ class Merge {
         }
         long t1 = System.currentTimeMillis()
         List<Config> newConfigs = configService.get(name, profiles.join(","), label, ConfigFormat.values())
-        logger.debug("Get configs ${name}:${profiles.join(",")}:${label} took ${System.currentTimeMillis()-t1}ms")
+        logger.info("Get configs ${name}:${profiles.join(",")}:${label} took ${System.currentTimeMillis()-t1}ms")
 
         if (newConfigs) {
             configs.addAll(newConfigs)

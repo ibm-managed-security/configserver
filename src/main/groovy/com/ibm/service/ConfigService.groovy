@@ -1,26 +1,21 @@
 package com.ibm.service
 
 import com.ibm.entity.Config
+import com.ibm.entity.ConfigFactory
 import com.ibm.entity.ConfigFormat
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
-import org.springframework.cloud.config.environment.Environment
 import org.springframework.cloud.config.server.environment.EnvironmentRepository
-import org.springframework.cloud.config.server.resource.NoSuchResourceException
 import org.springframework.cloud.config.server.resource.ResourceController
-import org.springframework.cloud.config.server.resource.ResourceRepository
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Component
 import org.springframework.util.StreamUtils
 import org.springframework.util.StringUtils
 
 import java.nio.charset.Charset
-
-import static org.springframework.cloud.config.server.support.EnvironmentPropertySource.prepareEnvironment
-import static org.springframework.cloud.config.server.support.EnvironmentPropertySource.resolvePlaceholders
 
 @Component
 class ConfigService {
@@ -33,6 +28,8 @@ class ConfigService {
     @Autowired
     private EnvironmentRepository environmentRepository;
 
+    @Autowired
+    private ConfigFactory configFactory
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigService.class)
 
@@ -65,7 +62,7 @@ class ConfigService {
             String extension = StringUtils.getFilenameExtension(r.getFilename())
             String profile = StringUtils.stripFilenameExtension(r.getFilename())
             ConfigFormat format = ConfigFormat.valueOf(extension.toUpperCase())
-            configs.push(new Config(name, profile, label, format, StreamUtils.copyToString(r.getInputStream(), Charset.forName("UTF-8"))))
+            configs.push(configFactory.createFromContent(name, profile, label, format, StreamUtils.copyToString(r.getInputStream(), Charset.forName("UTF-8"))))
         }
         return configs
     }
