@@ -36,7 +36,7 @@ class ConfigFactory {
                 return object
             case ConfigFormat.YML:
             case ConfigFormat.YAML:
-                return Yaml.dump(map)
+                return Yaml.dump(object)
             default:
                 return null
         }
