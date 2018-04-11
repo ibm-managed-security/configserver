@@ -150,7 +150,7 @@ class Merge {
 
         List<Config> configs = new ArrayList<Config>()
         if (clearCache) {
-            configService.clearCacheWithTTL(name, profiles.join(","), label, ConfigFormat.values()    )
+            configService.clearCacheWithTTL(name, profiles.join(","), label, ConfigFormat.values())
         }
         long t1 = System.currentTimeMillis()
         List<Config> newConfigs = configService.get(name, profiles.join(","), label, ConfigFormat.values())

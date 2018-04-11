@@ -45,7 +45,7 @@ class ConfigService {
             }
         }
         List<Config> configs = retrieve(name, profiles, label, (String[]) paths.toArray(String[]))
-        logger.debug("Attempting to fetch configs for ${name}:${profiles}:${label}:${formats} took ${System.currentTimeMillis()-t1}ms and resulted in ${configs.size()} configs")
+        logger.info("Attempting to fetch configs for ${name}:${profiles}:${label}:${formats} took ${System.currentTimeMillis()-t1}ms and resulted in ${configs.size()} configs")
         return configs
     }
 

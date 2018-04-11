@@ -42,15 +42,16 @@ class TTLConfigService {
         if (!lastCacheClear || current > lastCacheClear + ttlSeconds * 1000) {
             lastCacheClears.put(getCacheClearKey(name, profile, label, formats), current)
             configService.clearCache(name, profile, label, formats)
+            logger.info("Cleared cache for configs ${name}:${profile}:${label}")
         }
     }
 
-    synchronized List<Config> get(String name, String profiles, String label, ConfigFormat[] formats) {
+    List<Config> get(String name, String profiles, String label, ConfigFormat[] formats) {
         return configService.get(name, profiles, label, formats)
     }
 
 
-    synchronized List<Config> retrieve(String name, String profiles, String label, String[] paths) throws IOException {
+    List<Config> retrieve(String name, String profiles, String label, String[] paths) throws IOException {
         return configService.retrieve(name, profiles, label, paths)
     }
 
