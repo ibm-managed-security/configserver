@@ -1,19 +1,39 @@
 package com.ibm.utils
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 class Merger {
-    static Map deepMerge(Map onto, Map... overrides) {
-        if (!overrides)
-            return onto
-        else if (overrides.length == 1) {
-            overrides[0]?.each { k, v ->
-                if (v instanceof Map && onto[k] instanceof Map)
-                    deepMerge((Map) onto[k], (Map) v)
-                else
-                    onto[k] = v
-            }
-            return onto
+
+    private static final Logger logger = LoggerFactory.getLogger(Merger.class)
+
+    static Map deepMerge(Map ... maps) {
+        Map merged = new HashMap()
+        maps.each{ m ->
+            merged = merge(merged, m)
+            //logger.info(marker + ": IN MERGER: "+merged.toString().contains("janus"))
         }
-        return overrides.inject(onto, { acc, override -> deepMerge(acc, override ?: [:]) })
+        return merged
     }
 
+    private static Map merge(Map original, Map newMap) {
+        for (Object key : newMap.keySet()) {
+            if (newMap.get(key) instanceof Map && original.get(key) instanceof Map) {
+                Map originalChild = new LinkedHashMap(original.get(key));
+                Map newChild = new LinkedHashMap(newMap.get(key));
+                original.put(key, merge(originalChild, newChild));
+            } else if (newMap.get(key) instanceof List && original.get(key) instanceof List) {
+                List originalChild = new ArrayList(original.get(key));
+                List newChild = new ArrayList(newMap.get(key));
+                for (Object each : newChild) {
+                    if (!originalChild.contains(each)) {
+                        originalChild.add(each);
+                    }
+                }
+            } else {
+                original.put(key, newMap.get(key));
+            }
+        }
+        return original;
+    }
 }

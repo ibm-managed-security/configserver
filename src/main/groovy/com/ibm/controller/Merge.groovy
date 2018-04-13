@@ -89,7 +89,6 @@ class Merge {
     private Config getMergedConfig(List<Config> configs, ConfigFormat outputFormat, String path) {
         long t1 = System.currentTimeMillis()
         def merged = Merger.deepMerge(*(configs.collect{it.object}))
-        logger.info("Deep merge took ${System.currentTimeMillis()-t1}ms")
         t1 = System.currentTimeMillis()
         merged = ReferenceResolver.resolve(merged)
         logger.info("Reference resolver took ${System.currentTimeMillis()-t1}ms")
@@ -143,7 +142,7 @@ class Merge {
         returnConfigs
     }
 
-    private List<Config> getConfigs(String name, List profiles, String label, boolean includeDefaultsAndSecrets, boolean clearCache) {
+    private synchronized List<Config> getConfigs(String name, List profiles, String label, boolean includeDefaultsAndSecrets, boolean clearCache) {
         if (includeDefaultsAndSecrets) {
             profiles = getProfilesWithDefaultsAndSecrets(profiles)
         }
